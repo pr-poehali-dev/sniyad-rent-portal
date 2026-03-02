@@ -486,20 +486,7 @@ function SpeedCollageBanner({ accent, img }: { accent: string; img: string }) {
         backgroundImage: "repeating-linear-gradient(90deg, #000 0px, #000 16px, #fff 16px, #fff 32px)",
         opacity: 0.5,
       }} />
-      {/* Labels */}
-      <div className="absolute inset-0 flex items-center justify-around px-8">
-        {[
-          { emoji: "⏱️", label: "ХРОНОМЕТРАЖ" },
-          { emoji: "🏁", label: "ФИНИШ" },
-          { emoji: "🏎️", label: "ТРАССА" },
-          { emoji: "🔥", label: "РЕЗИНА" },
-        ].map(el => (
-          <div key={el.label} className="flex flex-col items-center gap-2 opacity-80">
-            <span className="text-5xl">{el.emoji}</span>
-            <span className="font-heading text-xs uppercase tracking-widest" style={{ color: accent }}>{el.label}</span>
-          </div>
-        ))}
-      </div>
+
     </div>
   );
 }
