@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
 // ─────────────── DATA ───────────────
@@ -200,15 +200,18 @@ function DirtButton({
   accent,
   filled,
   onClick,
+  type = "button",
 }: {
   children: React.ReactNode;
   accent: string;
   filled?: boolean;
   onClick?: () => void;
+  type?: "button" | "submit";
 }) {
   const [hov, setHov] = useState(false);
   return (
     <button
+      type={type}
       onClick={onClick}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
@@ -509,6 +512,214 @@ function SmokeBg({ img, accent }: { img: string; accent: string }) {
   );
 }
 
+// ─────────────── BOOKING FORM MODAL ───────────────
+
+const ALL_VEHICLES = SECTIONS.flatMap(s =>
+  s.categories.flatMap(c => c.items.map(it => it.name))
+);
+
+function BookingModal({ section, preselect, onClose }: {
+  section: SectionType;
+  preselect?: string;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [vehicle, setVehicle] = useState(preselect ?? "");
+  const [date, setDate] = useState("");
+  const [duration, setDuration] = useState("1");
+  const [comment, setComment] = useState("");
+  const [sent, setSent] = useState(false);
+  const firstRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    setTimeout(() => firstRef.current?.focus(), 100);
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handler);
+    };
+  }, [onClose]);
+
+  const accent = section.accent;
+  const bg = section.bgSection;
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    background: accent + "0A",
+    border: `1px solid ${accent}35`,
+    color: "#F0F0F0",
+    padding: "12px 16px",
+    fontFamily: "Oswald, sans-serif",
+    fontSize: "14px",
+    letterSpacing: "0.05em",
+    outline: "none",
+  };
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontFamily: "Oswald, sans-serif",
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.18em",
+    color: accent,
+    opacity: 0.6,
+    marginBottom: 6,
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSent(true);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.95)", backdropFilter: "blur(12px)" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="relative w-full max-w-lg max-h-[95vh] overflow-y-auto"
+        style={{ background: bg, border: `1px solid ${accent}50` }}
+      >
+        {/* Top accent bar */}
+        <div className="h-1" style={{ background: `linear-gradient(90deg, ${accent}, ${section.accentDark})` }} />
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5"
+          style={{ borderBottom: `1px solid ${accent}18` }}>
+          <div>
+            <p style={{ ...labelStyle, marginBottom: 3 }}>Снаряд — Аренда</p>
+            <h2 className="font-display text-3xl" style={{ color: "#F5F5F5" }}>ЗАЯВКА</h2>
+          </div>
+          <button onClick={onClose}
+            className="w-10 h-10 flex items-center justify-center font-heading text-base transition-all hover:opacity-60"
+            style={{ border: `1px solid ${accent}30`, color: accent }}>✕</button>
+        </div>
+
+        {sent ? (
+          <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+            <div className="text-6xl mb-6">✅</div>
+            <h3 className="font-display text-4xl mb-3" style={{ color: accent }}>ПРИНЯТО!</h3>
+            <p className="font-body text-white/50 text-sm mb-8">
+              Свяжемся с вами в течение 15 минут для подтверждения бронирования
+            </p>
+            <button
+              onClick={onClose}
+              className="px-10 py-3 font-heading text-sm uppercase tracking-widest"
+              style={{ background: accent, color: "#000" }}
+            >
+              Закрыть
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+
+            {/* Name */}
+            <div>
+              <label style={labelStyle}>Ваше имя</label>
+              <input
+                ref={firstRef}
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Как к вам обращаться"
+                required
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label style={labelStyle}>Телефон</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="+7 (___) ___-__-__"
+                required
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Vehicle select */}
+            <div>
+              <label style={labelStyle}>Техника</label>
+              <select
+                value={vehicle}
+                onChange={e => setVehicle(e.target.value)}
+                required
+                style={{ ...inputStyle, cursor: "pointer" }}
+              >
+                <option value="" disabled style={{ background: "#111" }}>Выберите из каталога</option>
+                {ALL_VEHICLES.map(v => (
+                  <option key={v} value={v} style={{ background: "#111" }}>{v}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date + duration */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label style={labelStyle}>Дата</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  required
+                  style={{ ...inputStyle, colorScheme: "dark" }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Количество часов</label>
+                <select
+                  value={duration}
+                  onChange={e => setDuration(e.target.value)}
+                  style={{ ...inputStyle, cursor: "pointer" }}
+                >
+                  {["1", "2", "3", "4", "6", "8", "Весь день (24ч)"].map(d => (
+                    <option key={d} value={d} style={{ background: "#111" }}>{d === "Весь день (24ч)" ? d : `${d} ч`}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Comment */}
+            <div>
+              <label style={labelStyle}>Комментарий</label>
+              <textarea
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                placeholder="Выезд, количество участников, пожелания..."
+                rows={3}
+                style={{ ...inputStyle, resize: "none" }}
+              />
+            </div>
+
+            {/* Info strip */}
+            <div className="flex items-center gap-3 px-4 py-3"
+              style={{ background: accent + "0D", border: `1px solid ${accent}20` }}>
+              <Icon name="Clock" size={16} style={{ color: accent, flexShrink: 0 }} />
+              <p className="font-body text-xs" style={{ color: accent, opacity: 0.7 }}>
+                Ответим в течение 15 минут · Без предоплаты · Бронирование бесплатно
+              </p>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="w-full py-4 font-heading text-base uppercase tracking-widest transition-opacity hover:opacity-85"
+              style={{ background: accent, color: "#000" }}
+            >
+              Отправить заявку →
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─────────────── MODAL ───────────────
 
 const PACKAGES = [
@@ -519,7 +730,7 @@ const PACKAGES = [
   { icon: "Camera", label: "Съёмка", desc: "Экшн-камеры" },
 ];
 
-function VehicleModal({ item, section, onClose }: { item: ItemType; section: SectionType; onClose: () => void }) {
+function VehicleModal({ item, section, onClose, onBook }: { item: ItemType; section: SectionType; onClose: () => void; onBook: (v: string) => void }) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -604,9 +815,11 @@ function VehicleModal({ item, section, onClose }: { item: ItemType; section: Sec
             </div>
           </div>
           {section.id === "dirt" ? (
-            <DirtButton accent={section.accent} filled>Оставить заявку на аренду</DirtButton>
+            <DirtButton accent={section.accent} filled onClick={() => { onClose(); onBook(item.name); }}>Оставить заявку на аренду</DirtButton>
           ) : (
-            <button className="w-full py-4 font-heading text-base uppercase tracking-widest"
+            <button
+              onClick={() => { onClose(); onBook(item.name); }}
+              className="w-full py-4 font-heading text-base uppercase tracking-widest"
               style={{ background: section.accent, color: "#000" }}>
               Оставить заявку на аренду
             </button>
@@ -625,6 +838,13 @@ export default function Index() {
   const [selectedItem, setSelectedItem] = useState<ItemType | null>(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [gridKey, setGridKey] = useState(0);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingPreselect, setBookingPreselect] = useState<string | undefined>();
+
+  const openBooking = (vehicle?: string) => {
+    setBookingPreselect(vehicle);
+    setBookingOpen(true);
+  };
 
   const section = SECTIONS[activeSectionIdx] as SectionType;
 
@@ -670,7 +890,7 @@ export default function Index() {
             </button>
           ))}
         </div>
-        <button className="px-4 py-2 font-heading text-sm uppercase tracking-wider" style={{ background: section.accent, color: "#000" }}>
+        <button onClick={() => openBooking()} className="px-4 py-2 font-heading text-sm uppercase tracking-wider" style={{ background: section.accent, color: "#000" }}>
           Заявка
         </button>
       </nav>
@@ -840,9 +1060,10 @@ export default function Index() {
               </p>
             </div>
             {isDirt ? (
-              <DirtButton accent={section.accent} filled>Узнать стоимость выезда</DirtButton>
+              <DirtButton accent={section.accent} filled onClick={() => openBooking()}>Узнать стоимость выезда</DirtButton>
             ) : (
               <button
+                onClick={() => openBooking()}
                 className="flex-shrink-0 px-8 py-3 font-heading uppercase tracking-widest text-sm hover:opacity-80 transition-opacity"
                 style={{ background: section.accent, color: "#000" }}
               >
@@ -878,7 +1099,10 @@ export default function Index() {
       `}</style>
 
       {selectedItem && (
-        <VehicleModal item={selectedItem} section={section} onClose={() => setSelectedItem(null)} />
+        <VehicleModal item={selectedItem} section={section} onClose={() => setSelectedItem(null)} onBook={(v) => { setSelectedItem(null); openBooking(v); }} />
+      )}
+      {bookingOpen && (
+        <BookingModal section={section} preselect={bookingPreselect} onClose={() => setBookingOpen(false)} />
       )}
     </div>
   );
