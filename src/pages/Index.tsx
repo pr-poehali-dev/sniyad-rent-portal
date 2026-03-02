@@ -250,21 +250,23 @@ function DirtButton({
 
 // ─────────────── STICKER CARD (Style section) ───────────────
 
+const STICKER_COLORS = ["#7C3AFF", "#84CC16", "#FF6B00", "#00BCD4"];
+
 function StickerCard({
   item,
   accent,
   accentDark,
-  bg,
   onSelect,
+  colorIdx,
 }: {
   item: ItemType;
   accent: string;
   accentDark: string;
-  bg: string;
   onSelect: (item: ItemType) => void;
+  colorIdx: number;
 }) {
   const [hov, setHov] = useState(false);
-  // Jagged sticker clip-path
+  const cardColor = STICKER_COLORS[colorIdx % STICKER_COLORS.length];
   const clip = "polygon(0% 8px, 8px 0%, calc(100% - 12px) 3px, 100% 10px, calc(100% - 4px) calc(100% - 8px), calc(100% - 10px) 100%, 6px calc(100% - 4px), 0% calc(100% - 12px))";
   const clipHov = "polygon(0% 6px, 10px 0%, calc(100% - 8px) 2px, 100% 8px, calc(100% - 3px) calc(100% - 6px), calc(100% - 8px) 100%, 5px calc(100% - 3px), 0% calc(100% - 10px))";
 
@@ -275,81 +277,112 @@ function StickerCard({
       onMouseLeave={() => setHov(false)}
       style={{
         cursor: "pointer",
-        background: hov ? accent + "18" : bg,
-        border: `2px solid ${accent}${hov ? "AA" : "40"}`,
+        background: cardColor + (hov ? "40" : "22"),
+        border: `2px solid ${cardColor}${hov ? "CC" : "60"}`,
         clipPath: hov ? clipHov : clip,
         transform: hov ? "translateY(-6px) rotate(0.4deg)" : "rotate(-0.2deg)",
         transition: "all 0.25s ease",
         position: "relative",
         overflow: "visible",
-        padding: "20px",
-        boxShadow: hov ? `0 8px 30px ${accent}40, 4px 4px 0 ${accent}30` : `2px 2px 0 ${accent}20`,
+        padding: "0 0 16px",
+        boxShadow: hov ? `0 8px 30px ${cardColor}50, 4px 4px 0 ${cardColor}40` : `2px 2px 0 ${cardColor}30`,
       }}
     >
-      {/* Sticker white border effect */}
+      {/* Photo placeholder */}
       <div style={{
-        position: "absolute", inset: -5, clipPath: clip,
-        background: accent + "18", zIndex: -1,
-        transition: "all 0.25s",
-      }} />
+        width: "100%", height: 120,
+        background: cardColor + "30",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexDirection: "column", gap: 6,
+        borderBottom: `1px solid ${cardColor}40`,
+        marginBottom: 14,
+      }}>
+        <Icon name="Image" size={28} style={{ color: cardColor, opacity: 0.5 }} />
+        <span style={{ fontFamily: "Oswald, sans-serif", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: cardColor, opacity: 0.4 }}>Фото</span>
+      </div>
 
-      {item.tag && (
+      <div style={{ padding: "0 16px" }}>
+        {/* Sticker border deco */}
         <div style={{
-          position: "absolute", top: -2, right: 8,
-          background: accent, color: "#000",
-          padding: "2px 10px",
-          fontFamily: "Oswald, sans-serif", fontWeight: 700,
-          fontSize: "11px", letterSpacing: "0.15em",
-          clipPath: "polygon(0 0, 100% 0, calc(100% - 6px) 100%, 6px 100%)",
-          zIndex: 10,
+          position: "absolute", inset: -5, clipPath: clip,
+          background: cardColor + "12", zIndex: -1, transition: "all 0.25s",
+        }} />
+
+        {item.tag && (
+          <div style={{
+            position: "absolute", top: -2, right: 8,
+            background: cardColor, color: "#000",
+            padding: "2px 10px",
+            fontFamily: "Oswald, sans-serif", fontWeight: 700,
+            fontSize: "11px", letterSpacing: "0.15em",
+            clipPath: "polygon(0 0, 100% 0, calc(100% - 6px) 100%, 6px 100%)",
+            zIndex: 10,
+          }}>
+            {item.tag}
+          </div>
+        )}
+
+        <p style={{ color: cardColor, opacity: 0.7, fontSize: "11px", fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 3 }}>
+          {item.type}
+        </p>
+        <h3 style={{ color: "#F5F5F5", fontFamily: "Bebas Neue, sans-serif", fontSize: "20px", lineHeight: 1.1, marginBottom: 10 }}>
+          {item.name}
+        </h3>
+        <div style={{
+          display: "inline-block", background: cardColor + "28", color: cardColor,
+          border: `1px solid ${cardColor}50`, padding: "2px 10px", fontSize: "11px",
+          fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.18em",
+          marginBottom: 12,
+          clipPath: "polygon(4px 0%, calc(100% - 4px) 0%, 100% 50%, calc(100% - 4px) 100%, 4px 100%, 0% 50%)",
         }}>
-          {item.tag}
+          ⚡ {item.power}
         </div>
-      )}
 
-      <p style={{ color: accent, opacity: 0.55, fontSize: "11px", fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 4 }}>
-        {item.type}
-      </p>
-      <h3 style={{ color: "#F5F5F5", fontFamily: "Bebas Neue, sans-serif", fontSize: "22px", lineHeight: 1, marginBottom: 12 }}>
-        {item.name}
-      </h3>
-      <div style={{
-        display: "inline-block", background: accent + "22", color: accent,
-        border: `1px solid ${accent}40`, padding: "2px 10px", fontSize: "11px",
-        fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.18em",
-        marginBottom: 16,
-        clipPath: "polygon(4px 0%, calc(100% - 4px) 0%, 100% 50%, calc(100% - 4px) 100%, 4px 100%, 0% 50%)",
-      }}>
-        ⚡ {item.power}
-      </div>
+        <div style={{ display: "flex", gap: 16, marginBottom: 14 }}>
+          {item.priceHour && (
+            <div>
+              <p style={{ fontSize: "10px", opacity: 0.4, fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 2 }}>Час</p>
+              <p style={{ fontFamily: "Bebas Neue, sans-serif", fontSize: "24px", color: cardColor, lineHeight: 1 }}>{item.priceHour.toLocaleString("ru")} ₽</p>
+            </div>
+          )}
+          {item.priceDay && (
+            <div>
+              <p style={{ fontSize: "10px", opacity: 0.4, fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 2 }}>Сутки</p>
+              <p style={{ fontFamily: "Bebas Neue, sans-serif", fontSize: "24px", color: accentDark, lineHeight: 1 }}>{item.priceDay.toLocaleString("ru")} ₽</p>
+            </div>
+          )}
+        </div>
 
-      <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
-        {item.priceHour && (
-          <div>
-            <p style={{ fontSize: "10px", opacity: 0.35, fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 2 }}>Час</p>
-            <p style={{ fontFamily: "Bebas Neue, sans-serif", fontSize: "28px", color: accent, lineHeight: 1 }}>{item.priceHour.toLocaleString("ru")} ₽</p>
-          </div>
-        )}
-        {item.priceDay && (
-          <div>
-            <p style={{ fontSize: "10px", opacity: 0.35, fontFamily: "Oswald, sans-serif", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 2 }}>Сутки</p>
-            <p style={{ fontFamily: "Bebas Neue, sans-serif", fontSize: "28px", color: accentDark, lineHeight: 1 }}>{item.priceDay.toLocaleString("ru")} ₽</p>
-          </div>
-        )}
+        <div style={{
+          width: "100%", padding: "9px 0", textAlign: "center",
+          fontFamily: "Oswald, sans-serif", fontSize: "12px", fontWeight: 700,
+          textTransform: "uppercase", letterSpacing: "0.2em",
+          background: hov ? cardColor : "transparent",
+          color: hov ? "#000" : cardColor,
+          border: `1.5px solid ${cardColor}70`,
+          clipPath: "polygon(8px 0%, calc(100% - 8px) 0%, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0% 50%)",
+          transition: "all 0.2s",
+        }}>
+          Подробнее →
+        </div>
       </div>
+    </div>
+  );
+}
 
-      <div style={{
-        width: "100%", padding: "10px 0", textAlign: "center",
-        fontFamily: "Oswald, sans-serif", fontSize: "13px", fontWeight: 700,
-        textTransform: "uppercase", letterSpacing: "0.2em",
-        background: hov ? accent : "transparent",
-        color: hov ? "#000" : accent,
-        border: `1.5px solid ${accent}60`,
-        clipPath: "polygon(8px 0%, calc(100% - 8px) 0%, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0% 50%)",
-        transition: "all 0.2s",
-      }}>
-        Подробнее →
-      </div>
+// ─────────────── PHOTO PLACEHOLDER ───────────────
+
+function PhotoPlaceholder({ accent }: { accent: string }) {
+  return (
+    <div style={{
+      width: "100%", height: 130,
+      background: accent + "0F",
+      borderBottom: `1px solid ${accent}20`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexDirection: "column", gap: 6,
+    }}>
+      <Icon name="Image" size={26} style={{ color: accent, opacity: 0.35 }} />
+      <span style={{ fontFamily: "Oswald, sans-serif", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: accent, opacity: 0.25 }}>Фото</span>
     </div>
   );
 }
@@ -360,15 +393,17 @@ function VehicleCard({
   item,
   section,
   onSelect,
+  colorIdx,
 }: {
   item: ItemType;
   section: SectionType;
   onSelect: (item: ItemType) => void;
+  colorIdx?: number;
 }) {
   const [hovered, setHovered] = useState(false);
 
   if (section.id === "style") {
-    return <StickerCard item={item} accent={section.accent} accentDark={section.accentDark} bg={section.bg} onSelect={onSelect} />;
+    return <StickerCard item={item} accent={section.accent} accentDark={section.accentDark} onSelect={onSelect} colorIdx={colorIdx ?? 0} />;
   }
 
   return (
@@ -392,22 +427,26 @@ function VehicleCard({
           {item.tag}
         </div>
       )}
-      <div className="p-5">
+
+      {/* Photo placeholder */}
+      <PhotoPlaceholder accent={section.accent} />
+
+      <div className="p-4">
         <p className="text-xs font-body uppercase tracking-widest mb-1" style={{ color: section.accent, opacity: 0.6 }}>
           {item.type}
         </p>
-        <h3 className="font-heading text-xl uppercase leading-tight text-white mb-3">{item.name}</h3>
+        <h3 className="font-heading text-lg uppercase leading-tight text-white mb-2">{item.name}</h3>
         <div
-          className="text-xs font-body uppercase tracking-widest px-2 py-1 inline-block mb-5"
+          className="text-xs font-body uppercase tracking-widest px-2 py-1 inline-block mb-4"
           style={{ background: section.accent + "18", color: section.accent, border: `1px solid ${section.accent}35` }}
         >
           ⚡ {item.power}
         </div>
-        <div className="flex gap-6 mb-5">
+        <div className="flex gap-5 mb-4">
           {item.priceHour && (
             <div>
               <p className="text-xs opacity-40 font-body uppercase tracking-wider mb-0.5">Час</p>
-              <p className="font-display text-2xl leading-none" style={{ color: section.accent }}>
+              <p className="font-display text-xl leading-none" style={{ color: section.accent }}>
                 {item.priceHour.toLocaleString("ru")} ₽
               </p>
             </div>
@@ -415,7 +454,7 @@ function VehicleCard({
           {item.priceDay && (
             <div>
               <p className="text-xs opacity-40 font-body uppercase tracking-wider mb-0.5">Сутки</p>
-              <p className="font-display text-2xl leading-none" style={{ color: section.accentDark }}>
+              <p className="font-display text-xl leading-none" style={{ color: section.accentDark }}>
                 {item.priceDay.toLocaleString("ru")} ₽
               </p>
             </div>
@@ -875,20 +914,40 @@ export default function Index() {
           <span className="font-display text-xl tracking-widest text-white">СНАРЯД</span>
         </div>
         <div className="hidden md:flex items-center gap-1">
-          {SECTIONS.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => setActiveSectionIdx(i)}
-              className="px-4 py-1.5 font-heading text-sm uppercase tracking-wider transition-all duration-300"
-              style={{
-                background: i === activeSectionIdx ? s.accent : "transparent",
-                color: i === activeSectionIdx ? "#000" : s.accent,
-                border: `1px solid ${s.accent}${i === activeSectionIdx ? "FF" : "35"}`,
-              }}
-            >
-              {s.label}
-            </button>
-          ))}
+          {SECTIONS.map((s, i) => {
+            const active = i === activeSectionIdx;
+            // per-section nav button shape
+            const clipMap: Record<string, string> = {
+              dirt: "polygon(3px 0%, calc(100% - 6px) 2px, 100% 4px, calc(100% - 2px) calc(100% - 3px), calc(100% - 8px) 100%, 4px calc(100% - 1px), 0% calc(100% - 5px), 2px 3px)",
+              speed: "none",
+              style: "polygon(0% 6px, 6px 0%, calc(100% - 6px) 0%, 100% 6px, calc(100% - 6px) 100%, 6px 100%)",
+              classic: "none",
+              patriot: "none",
+            };
+            return (
+              <button
+                key={s.id}
+                onClick={() => setActiveSectionIdx(i)}
+                className="px-4 py-1.5 font-heading text-sm uppercase tracking-wider transition-all duration-300"
+                style={{
+                  background: active ? s.accent : "transparent",
+                  color: active ? "#000" : s.accent,
+                  border: `1px solid ${s.accent}${active ? "FF" : "35"}`,
+                  clipPath: clipMap[s.id] ?? "none",
+                  borderRadius: s.id === "classic" ? "0" : undefined,
+                  // speed: skewed
+                  transform: s.id === "speed" ? "skewX(-8deg)" : undefined,
+                  // patriot: double border trick via outline
+                  outline: s.id === "patriot" && active ? `2px solid ${s.accentDark}` : undefined,
+                  outlineOffset: s.id === "patriot" ? "2px" : undefined,
+                }}
+              >
+                <span style={{ display: "inline-block", transform: s.id === "speed" ? "skewX(8deg)" : undefined }}>
+                  {s.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
         <button onClick={() => openBooking()} className="px-4 py-2 font-heading text-sm uppercase tracking-wider" style={{ background: section.accent, color: "#000" }}>
           Заявка
@@ -1032,11 +1091,11 @@ export default function Index() {
           </div>
 
           {/* Cards */}
-          <div key={gridKey} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          <div key={gridKey} className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"
             style={{ padding: isStyle ? "8px 4px" : undefined }}>
             {currentItems.map((item, i) => (
               <div key={item.name} style={{ animation: `fadeUp 0.5s ease ${i * 0.08}s both` }}>
-                <VehicleCard item={item} section={section} onSelect={setSelectedItem} />
+                <VehicleCard item={item} section={section} onSelect={setSelectedItem} colorIdx={i} />
               </div>
             ))}
           </div>
@@ -1056,7 +1115,7 @@ export default function Index() {
             <div className="flex-1">
               <h3 className="font-heading text-2xl uppercase mb-2" style={{ color: section.accent }}>Выездной пакет</h3>
               <p className="font-body text-sm text-white/50">
-                Минимум 3 часа · Доставка + Механик + Инструктаж + Экипировка + Камеры
+                Любое время · Доставка + Механик + Инструктаж + Экипировка + Камеры
               </p>
             </div>
             {isDirt ? (
